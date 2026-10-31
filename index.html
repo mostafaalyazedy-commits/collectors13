@@ -107,7 +107,16 @@ function external(q,type='search'){
   link.remove();
 }
 function getName(){const r=items[idx].original;return mapped(r,'english')||mapped(r,'arabic')||mapped(r,'code')}
-function buildOutput(){persistCurrent(false);return items.map((p,i)=>({...p.original,'Image URLs':imageInfo(p).unique.join('\n'),'Raw Description':p.description,'Product Source URL':p.sourceUrl,'Research Notes':p.notes,'Research Status':statusOf(p),'Image Count':imageInfo(p).unique.filter(isUrl).length,'Researcher':researcher,'Batch':batch,'Last Edited At':p.editedAt,'Source Row':i+2}))}
+function buildOutput(){
+  persistCurrent(false);
+  const imageLists=items.map(p=>imageInfo(p).unique);
+  const maxImages=Math.max(1,...imageLists.map(urls=>urls.length));
+  return items.map((p,i)=>{
+    const imageColumns={};
+    for(let n=0;n<maxImages;n++)imageColumns['IMAGE URL-'+(n+1)]=imageLists[i][n]||'';
+    return {...p.original,...imageColumns,'Raw Description':p.description,'Product Source URL':p.sourceUrl,'Research Notes':p.notes,'Research Status':statusOf(p),'Image Count':imageLists[i].filter(isUrl).length,'Researcher':researcher,'Batch':batch,'Last Edited At':p.editedAt,'Source Row':i+2};
+  });
+}
 function dl(blob,name){const u=URL.createObjectURL(blob),a=document.createElement('a');a.href=u;a.download=name;document.body.append(a);a.click();a.remove();setTimeout(()=>URL.revokeObjectURL(u),30000)}
 function outputName(ext){const safe=x=>String(x||'').replace(/[\\/:*?"<>|]/g,'_').slice(0,70);return `${safe(fileName)}_Research_${safe(batch||'Batch')}_${new Date().toISOString().slice(0,10)}.${ext}`}
 function csv(rows){if(!rows.length)return alert('لا توجد نتائج');const cols=Object.keys(rows[0]),str=[cols,...rows.map(r=>cols.map(c=>r[c]??''))].map(a=>a.map(x=>'"'+String(x).replaceAll('"','""')+'"').join(',')).join('\r\n');dl(new Blob(['\ufeff'+str],{type:'text/csv;charset=utf-8'}),outputName('csv'))}
