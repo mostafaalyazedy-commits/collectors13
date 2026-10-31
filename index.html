@@ -40,7 +40,7 @@ button:disabled{opacity:.46;cursor:not-allowed} [hidden]{display:none!important}
 </div>
 <div class="product-cards"><div class="product-card"><small>ITEM CODE · اضغط للبحث</small><button id="searchCode">—</button></div><div class="product-card"><small>ENGLISH NAME · اضغط للبحث</small><button id="searchEnglish">—</button></div><div class="product-card"><small>ARABIC NAME · اضغط للبحث</small><button id="searchArabic">—</button></div></div>
 <div class="row between"><button class="btn" id="competitorOpen">🌐 فتح صفحة المنافس</button><button class="btn" id="googleImages">🖼️ البحث عن صور المنتج</button><button class="btn" id="copyNames">📋 نسخ الاسم</button></div>
-<div class="section"><div class="section-title"><strong>📌 حالة البحث</strong></div><select id="manualStatus"><option value="auto">تلقائي: حسب اكتمال الصور والوصف</option><option value="review">يحتاج مراجعة</option><option value="unavailable">تعذّر العثور على بيانات موثوقة</option></select><p class="hint" id="autoStatusText">يُعتبر الصنف مكتملاً عند وجود رابط صورة ووصف خام معاً.</p></div><div class="section"><div class="section-title"><strong>🔗 رابط صفحة المنتج المصدر</strong><button type="button" class="btn paste-inline" id="pasteSource">📋 لصق الرابط</button></div><input id="sourceUrl" type="text" dir="ltr" placeholder="https://example.com/product-page"><p class="hint">رابط الصفحة الفعلية التي نقلت منها الصور أو الوصف، وليس رابط نتائج البحث.</p></div><div class="section"><div class="section-title"><strong>🖼️ روابط صور المنتج</strong><button type="button" class="btn paste-inline" id="pasteImages">📋 لصق الصور</button></div><textarea id="imageUrls" dir="ltr" placeholder="https://site.com/product-front.jpg&#10;https://site.com/product-back.jpg"></textarea><div class="row" style="margin-top:9px"><span class="hint" id="imageFeedback">يمكنك لصق رابط واحد أو عدة روابط</span></div></div>
+<div class="section"><div class="section-title"><strong>📌 حالة البحث</strong></div><select id="manualStatus"><option value="auto">تلقائي: حسب اكتمال الصور والوصف</option><option value="review">يحتاج مراجعة</option><option value="unavailable">تعذّر العثور على بيانات موثوقة</option></select><p class="hint" id="autoStatusText">يُعتبر الصنف مكتملاً عند وجود رابط صورة ووصف خام معاً.</p></div><div class="section"><div class="section-title"><strong>🔗 رابط صفحة المنتج المصدر</strong><button type="button" class="btn paste-inline" id="pasteSource">📋 لصق الرابط</button></div><input id="sourceUrl" type="text" dir="ltr" placeholder="https://example.com/product-page"><p class="hint">رابط الصفحة الفعلية التي نقلت منها الصور أو الوصف، وليس رابط نتائج البحث.</p></div><div class="section"><div class="section-title"><strong>🖼️ روابط صور المنتج</strong><button type="button" class="btn paste-inline" id="pasteImages">📋 إضافة روابط صور</button><button type="button" class="btn paste-inline" id="copyImages">📋 نسخ كل الروابط</button></div><textarea id="imageUrls" dir="ltr" placeholder="https://site.com/product-front.jpg&#10;https://site.com/product-back.jpg"></textarea><div class="row" style="margin-top:9px"><span class="hint" id="imageFeedback">أضف رابط كل صورة؛ كل لصق يضاف للروابط السابقة بدون تكرار</span></div></div>
 <div class="section"><div class="section-title"><strong>📝 Raw Description · الوصف الخام</strong><span class="hint">انسخ الوصف من صفحة المنتج والصقه هنا</span></div><textarea id="description" rows="7" placeholder="الصق وصف المنتج الكامل هنا..."></textarea><div class="row" style="margin-top:9px"><button class="btn" id="pasteDescription">📋 لصق من الحافظة</button></div></div>
 <div class="section"><div class="section-title"><strong>🔖 ملاحظات (اختياري)</strong></div><textarea id="notes" rows="2" style="min-height:65px" placeholder="مثل: لم أجد صورة / الصفحة غير مطابقة ..."></textarea></div>
 
@@ -125,7 +125,7 @@ $('filterProducts').oninput=refreshSummary;$('productsList').addEventListener('c
 document.addEventListener('keydown',e=>{if(e.ctrlKey&&e.key==='Enter'&&!e.repeat&&!e.isComposing&&items.length&&idx<items.length-1){e.preventDefault();go(idx+1)}});
 $('nextBtn').onclick=()=>go(idx+1);$('previousBtn').onclick=()=>go(idx-1);$('jumpBtn').onclick=()=>go(Number($('jumpInput').value)-1);$('nextIncomplete').onclick=()=>{persistCurrent();let j=items.findIndex((p,i)=>i>idx&&statusOf(p)!=='complete');if(j<0)j=items.findIndex(p=>statusOf(p)!=='complete');if(j<0)alert('كل الأصناف مكتملة');else go(j)};
 $('saveNow').onclick=async()=>{await saveNow();if(!saveFailure)setSaving('✓ تم الحفظ يدويًا')};
-for(const s of ['Code','English','Arabic'])$('search'+s).onclick=()=>external(mapped(items[idx].original,s.toLowerCase()));$('googleImages').onclick=()=>external(getName(),'images');$('competitorOpen').onclick=()=>external(mapped(items[idx].original,'competitor'),'url');
+for(const s of ['Code','English','Arabic'])$('search'+s).onclick=()=>{if(!items.length)return;const name=mapped(items[idx].original,s.toLowerCase());if(name)external(s==='Code'?name:name+' وصف عربي وانجليزي')};$('googleImages').onclick=()=>external(getName(),'images');$('competitorOpen').onclick=()=>external(mapped(items[idx].original,'competitor'),'url');
 $('copyNames').onclick=async()=>{try{await navigator.clipboard.writeText(getName())}catch{alert('حدد الاسم ثم استخدم Ctrl+C')}};
 async function pasteSourceUrl(){
   try{
@@ -135,7 +135,23 @@ async function pasteSourceUrl(){
     $('sourceUrl').dispatchEvent(new Event('input',{bubbles:true}));
   }catch(e){$('sourceUrl').focus();alert('تعذر الوصول للحافظة تلقائياً. استخدم Ctrl+V في خانة الرابط.');}
 }
-async function paste(id){try{let x=await navigator.clipboard.readText();if(!x)return;$(id).value=$(id).value.trim()?$(id).value+'\n'+x:x;persistCurrent();refreshSummary()}catch{$(id).focus();alert('المتصفح منع قراءة الحافظة. استخدم Ctrl+V')}}
+function appendImageUrls(value){
+  const field=$('imageUrls');
+  field.value=[...new Set([...lines(field.value),...lines(value)])].join('\n');
+  persistCurrent();refreshSummary();
+  field.scrollTop=field.scrollHeight;
+}
+async function paste(id){try{let x=await navigator.clipboard.readText();if(!x)return;if(id==='imageUrls'){appendImageUrls(x);return;}$(id).value=$(id).value.trim()?$(id).value+'\n'+x:x;persistCurrent();refreshSummary()}catch{$(id).focus();alert('المتصفح منع قراءة الحافظة. استخدم Ctrl+V')}}
+$('imageUrls').addEventListener('paste',e=>{
+  const value=e.clipboardData?.getData('text/plain');
+  if(value){e.preventDefault();appendImageUrls(value);}
+});
+$('copyImages').onclick=async()=>{
+  const field=$('imageUrls'),value=[...new Set(lines(field.value))].join('\n');
+  if(!value)return alert('أضف روابط الصور أولاً');
+  try{await navigator.clipboard.writeText(value);$('copyImages').textContent='✓ تم نسخ الروابط';setTimeout(()=>$('copyImages').textContent='📋 نسخ كل الروابط',1500)}
+  catch{field.focus();field.select();alert('اضغط Ctrl+C لنسخ كل روابط الصور');}
+};
 $('pasteSource').onclick=()=>pasteSourceUrl();$('pasteImages').onclick=()=>paste('imageUrls');$('pasteDescription').onclick=()=>paste('description');
 $('exportBtn').onclick=async()=>{const rows=buildOutput();if(!rows.length)return alert('لا توجد نتائج');try{if(!excelReady())throw Error('XLSX not available');const ws=XLSX.utils.json_to_sheet(rows);ws['!cols']=Object.keys(rows[0]).map(h=>({wch:/Description|URLs|Notes|URL/.test(h)?48:22}));const wb=XLSX.utils.book_new();XLSX.utils.book_append_sheet(wb,ws,'Research Results');XLSX.writeFile(wb,outputName('xlsx'))}catch(e){alert('تعذر إنشاء Excel، سيتم تنزيل CSV بدلاً منه.');csv(rows)}await saveNow()};
 $('csvBtn').onclick=async()=>{csv(buildOutput());await saveNow()};$('backupBtn').onclick=backup;
